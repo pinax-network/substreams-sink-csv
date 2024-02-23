@@ -7,7 +7,7 @@ $ npm install -g substreams-sink-csv
 ```
 
 ### SQL Table Schema
-
+**schema.sql**
 ```sql
 CREATE TABLE block_meta
 (
