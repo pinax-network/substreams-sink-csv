@@ -1,5 +1,5 @@
 {
-    "version": "0.1.0",
+    "version": "0.2.2",
     "name": "substreams-sink-csv",
     "description": "Substreams Sink CSV",
     "type": "module",
@@ -13,6 +13,7 @@
         "email": "denis@pinax.network"
     },
     "files": [
+        "index.ts",
         "dist",
         "src"
     ],
