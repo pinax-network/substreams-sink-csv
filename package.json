@@ -1,0 +1,42 @@
+{
+    "version": "0.1.0",
+    "name": "substreams-sink-csv",
+    "description": "Substreams Sink CSV",
+    "type": "module",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "bin": {
+        "substreams-sink-csv": "dist/bin/cli.js"
+    },
+    "author": {
+        "name": "Denis",
+        "email": "denis@pinax.network"
+    },
+    "files": [
+        "dist",
+        "src"
+    ],
+    "sideEffects": false,
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "default": "./dist/index.js"
+        }
+    },
+    "scripts": {
+        "start": "tsc && node ./dist/bin/cli.js run",
+        "pretest": "tsc --noEmit",
+        "test": "bun test",
+        "prepublishOnly": "tsc"
+    },
+    "dependencies": {
+        "@substreams/sink-entity-changes": "^0.3.9",
+        "log-update": "latest",
+        "substreams-sink": "^0.15.0"
+    },
+    "devDependencies": {
+        "@types/bun": "latest",
+        "typescript": "latest"
+    }
+}
