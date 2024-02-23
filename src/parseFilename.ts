@@ -10,13 +10,13 @@ export function parseFilename(moduleHash: string, options: CSVRunOptions) {
       // create directory if it doesn't exist
       if ( !fs.existsSync(dirname) ) fs.mkdirSync(dirname, { recursive: true });
       const cursorFile = `${name}.cursor`;
-      const blockFile = `${name}.block`;
-      return { name, cursorFile, blockFile };
+      const clockFile = `${name}.clock`;
+      return { name, cursorFile, clockFile };
     }
     // auto-generate filename (<network>-<moduleHash>-<moduleName>.csv)
     const network = options.substreamsEndpoint.split(":")[0];
     const name = `${network}-${moduleHash}-${options.moduleName}`
     const cursorFile = `${name}.cursor`;
-    const blockFile = `${name}.block`;
-    return { name, cursorFile, blockFile };
+    const clockFile = `${name}.clock`;
+    return { name, cursorFile, clockFile };
   }

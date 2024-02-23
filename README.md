@@ -11,14 +11,23 @@ $ npm install -g substreams-sink-csv
 ```sql
 CREATE TABLE block_meta
 (
-    id          TEXT NOT NULL CONSTRAINT block_meta_pk PRIMARY KEY,
-    at          TIMESTAMP,
-    number      BIGINT,
+    block_num   BIGINT,
+    timestamp   TIMESTAMP,
+    id          TEXT,
     hash        TEXT,
-    parent_hash TEXT,
-    timestamp   TIMESTAMP
+    parent_hash TEXT
 );
 ```
+
+**Reserved field names** to be used to expand the schema:
+
+- `id` (TEXT NOT NULL PRIMARY KEY)
+- `block_num` (BIGINT)
+- `block_id` (TEXT)
+- `cursor` (TEXT)
+- `timestamp` (TIMESTAMP)
+- `seconds` (BIGINT)
+- `operation` (TEXT)
 
 ### Get Substreams API Key
 
@@ -37,4 +46,22 @@ SUBSTREAMS_ENDPOINT=eth.substreams.pinax.network:443
 
 ```bash
 $ substreams-sink-csv --schema schema.sql
+```
+
+### CSV filename schema
+
+The CSV filename is generated using the following pattern:
+
+```yml
+<endpoint>-<module_hash>-<module_name>-<entity>.csv
+```
+
+Additionally, `*.clock` & `*.cursor` files are generated to keep track of the last block processed.
+
+**Example:**
+
+```yml
+eth.substreams.pinax.network-3b180e1d2390afef1f22651581304e04245ba001-graph_out-block_meta.csv
+eth.substreams.pinax.network-3b180e1d2390afef1f22651581304e04245ba001-graph_out.clock
+eth.substreams.pinax.network-3b180e1d2390afef1f22651581304e04245ba001-graph_out.cursor
 ```
