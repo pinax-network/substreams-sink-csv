@@ -45,7 +45,7 @@ SUBSTREAMS_ENDPOINT=eth.substreams.pinax.network:443
 ```
 
 ```bash
-$ substreams-sink-csv --schema schema.sql
+$ substreams-sink-csv run --schema schema.sql
 ```
 
 ### CSV filename schema
