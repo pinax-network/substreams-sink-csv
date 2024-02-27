@@ -12,7 +12,7 @@ export interface CSVRunOptions extends commander.RunOptions {
 
 // Run Webhook Sink
 const program = commander.program(pkg);
-const command = commander.run(program, pkg);
+const command = commander.addRunOptions(program, pkg, {metrics: false, http: false});
 command.addOption(new Option("--filename <string>", "CSV filename (default: '<endpoint>-<module_hash>-<module_name>.csv')").env("FILENAME"));
 command.addOption(new Option("--schema <string>", "SQL Table Schema for CSV").default("schema.sql").env("SCHEMA"));
 command.action(action);
