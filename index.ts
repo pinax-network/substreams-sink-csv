@@ -25,7 +25,7 @@ export async function action(options: CSVRunOptions ) {
 
   // Cursor
   const moduleHash = await getModuleHash(options);
-  const { name, cursorFile, clockFile } = parseFilename(moduleHash, options);
+  const { name, cursorFile, clockFile, sessionFile } = parseFilename(moduleHash, options);
   const startCursor = fs.existsSync(cursorFile) ? fs.readFileSync(cursorFile, "utf8") : '';
 
   // CSV writer (append)
@@ -45,9 +45,31 @@ export async function action(options: CSVRunOptions ) {
   // Block Emitter
   const { emitter } = await setup({ ...options, cursor: startCursor });
 
-  // stats
+  // log stats
   let rows = 0;
   let blocks = 0;
+  let last_block_num = 0;
+  let last_timestamp = "";
+  let totalBytesRead = 0;
+  let totalBytesWritten = 0;
+  let traceId = "";
+  let start_block = 0;
+  let workers = 0;
+
+  emitter.on("session", (session) => {
+    fs.writeFileSync(sessionFile, JSON.stringify(session, null, 2));
+    traceId = session.traceId;
+    start_block = Number(session.resolvedStartBlock);
+    workers = Number(session.maxParallelWorkers)
+  });
+
+  emitter.on("progress", (progress) => {
+    if ( progress.processedBytes ) {
+      totalBytesRead += Number(progress.processedBytes.totalBytesRead);
+      totalBytesWritten += Number(progress.processedBytes.totalBytesWritten);
+    }
+    log();
+  });
 
   emitter.on("clock", (clock) => {
     // write block to file
@@ -90,8 +112,16 @@ export async function action(options: CSVRunOptions ) {
     };
 
     // logging
-    logUpdate(`[substreams-sink-csv] block_num=${block_num} timestamp=${timestamp} blocks=${++blocks} rows=${rows}`);
+    blocks++;
+    log();
   });
+
+  function log() {
+    logUpdate(`[substreams-sink-csv]
+trace_id=${traceId} start_block=${start_block} module_hash=${moduleHash} workers=${workers}
+last_block_num=${last_block_num} last_timestamp=${last_timestamp} blocks=${blocks} rows=${rows} bytes_read=${totalBytesRead} bytes_written=${totalBytesWritten}
+`);
+  }
 
   fileCursor.onCursor(emitter, cursorFile);
   emitter.start();
