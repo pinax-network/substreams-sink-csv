@@ -1,5 +1,5 @@
 {
-    "version": "0.2.3",
+    "version": "0.2.4",
     "name": "substreams-sink-csv",
     "description": "Substreams Sink CSV",
     "type": "module",
@@ -26,7 +26,7 @@
         }
     },
     "scripts": {
-        "start": "tsc && node ./dist/bin/cli.js --help",
+        "start": "tsc && node ./dist/bin/cli.js",
         "pretest": "tsc --noEmit",
         "test": "bun test",
         "prepublishOnly": "tsc"

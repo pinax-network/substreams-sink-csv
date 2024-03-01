@@ -42,10 +42,15 @@ SUBSTREAMS_API_KEY=<your-api-key>
 MANIFEST=https://github.com/streamingfast/substreams-eth-block-meta/releases/download/v0.5.1/substreams-eth-block-meta-v0.5.1.spkg
 MODULE_NAME=graph_out
 SUBSTREAMS_ENDPOINT=eth.substreams.pinax.network:443
+SCHEMA=schema.example.sql
 ```
-**CLI**
+**CLI** with `.env` file
 ```bash
-$ substreams-sink-csv --schema schema.sql
+$ substreams-sink-csv
+```
+**CLI** with `params`
+```bash
+$ substreams-sink-csv --schema schema.example.sql -e eth.substreams.pinax.network:443 --module-name graph_out --manifest https://github.com/streamingfast/substreams-eth-block-meta/releases/download/v0.5.1/substreams-eth-block-meta-v0.5.1.spkg --substreams-api-key <your-api-key>
 ```
 
 ### Substreams Support
