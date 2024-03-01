@@ -1,14 +1,23 @@
 import fs from "fs";
+import path from "path";
 import { setup, fileCursor } from "substreams-sink";
 import { CSVRunOptions } from "./bin/cli.js"
 import { EntityChanges, getValuesInEntityChange } from "@substreams/sink-entity-changes/zod"
 import logUpdate from "log-update";
-import { getModuleHash } from "./src/getModuleHash.js";
+import { getModuleHash, isRemotePath } from "./src/getModuleHash.js";
 import { parseFilename } from "./src/parseFilename.js";
 import { parseClock } from "./src/parseClock.js";
 import { parseSchema } from "./src/parseSchema.js";
 
 export async function action(options: CSVRunOptions ) {
+  // @substreams/manifest issue
+  // if manifest is local, add current directory
+  if (!isRemotePath(options.manifest) && !path.isAbsolute(options.manifest)) {
+    const currentDir = process.cwd();
+    options.manifest = path.join(currentDir, options.manifest);
+  }
+  if ( !fs.existsSync(options.manifest) ) throw new Error(`Manifest file not found: ${options.manifest}`);
+
   // SQL schema
   if ( !fs.existsSync(options.schema) ) throw new Error(`Schema file not found: ${options.schema}`);
   const schema = fs.readFileSync(options.schema, "utf8");

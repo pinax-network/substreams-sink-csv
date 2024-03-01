@@ -2,6 +2,10 @@ import { readPackage } from "@substreams/manifest";
 import { CSVRunOptions } from "../bin/cli.js";
 import { createModuleHashHex } from "@substreams/core";
 
+export function isRemotePath(path: string): boolean {
+  return path.startsWith("http://") || path.startsWith("https://");
+}
+
 export async function getModuleHash(options: CSVRunOptions) {
     // Read Substream
     const substreamPackage = await readPackage(options.manifest);
