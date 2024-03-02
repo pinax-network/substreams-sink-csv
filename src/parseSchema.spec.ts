@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { parseColumn, parseCreateTable, parseSchema } from "./parseSchema.js";
+import { parseColumn, parseCreateTable, parseSchema, preParseStatement } from "./parseSchema.js";
 
 test("parseCreateTable", () => {
     expect(parseCreateTable("CREATE TABLE block_meta")).toBe("block_meta");
@@ -21,6 +21,12 @@ test("parseColumn", () => {
     expect(parseColumn("PRIMARY KEY(evt_tx_hash,evt_index)")).toBe("");
     expect(parseColumn("PRIMARY KEY (ID)")).toBe("");
     expect(parseColumn("CONSTRAINT PK_Person PRIMARY KEY (ID,LastName)")).toBe("");
+})
+
+test("preParseStatement", () => {
+    expect(preParseStatement("parent_hash TEXT, ")).toBe("parent_hash TEXT");
+    expect(preParseStatement("   \"timestamp\" INTEGER ")).toBe("timestamp INTEGER");
+    expect(preParseStatement("'timestamp' INTEGER")).toBe("timestamp INTEGER");
 })
 
 test("parseSchema::factory_pair_created", ()  => {
@@ -62,4 +68,87 @@ test("parseSchema::block_meta", () => {
     );`
     const tables = parseSchema(sql);
     expect(tables).toEqual(new Map([["block_meta", ["id", "at", "number", "hash", "parent_hash", "timestamp"]]]));
+});
+
+test("parseSchema::transfers", () => {
+    const sql = `
+    -- Table for transfers --
+    CREATE TABLE IF NOT EXISTS transfers (
+        -- trace information
+        trx_id String,
+        action_index UInt32,
+        -- contract & scope --
+        contract FixedString(12),
+        action String,
+        symcode String,
+        -- data payload --
+        from FixedString(12),
+        to FixedString(12),
+        quantity String,
+        memo String,
+        -- extras --
+        precision UInt32,
+        amount Int64,
+        value Float64,
+    )
+    ENGINE = ReplacingMergeTree()
+    -- primary key = trx_id + action_index --
+    PRIMARY KEY (id)
+    ORDER BY (id);
+
+    -- Table for accounts --
+    CREATE TABLE IF NOT EXISTS accounts (
+        -- trace information --
+        trx_id String,
+        action_index UInt32,
+
+        -- contract & scope --
+        contract FixedString(12),
+        symcode String,
+
+        -- data payload --
+        account FixedString(12),
+        balance String,
+        balance_delta Int64,
+
+        -- extras --
+        precision UInt32,
+        amount Int64,
+        value Float64,
+    )
+    ENGINE = ReplacingMergeTree()
+    -- primary key = trx_id + action_index --
+    PRIMARY KEY (id)
+    ORDER BY (id);
+`
+    const tables = parseSchema(sql);
+    expect(tables).toEqual(new Map([[
+        "transfers",
+        [
+            "trx_id",
+            "action_index",
+            "contract",
+            "action",
+            "symcode",
+            "from",
+            "to",
+            "quantity",
+            "memo",
+            "precision",
+            "amount",
+            "value",
+        ]],[
+        "accounts",
+        [
+            "trx_id",
+            "action_index",
+            "contract",
+            "symcode",
+            "account",
+            "balance",
+            "balance_delta",
+            "precision",
+            "amount",
+            "value",
+        ]]]));
 });
