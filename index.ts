@@ -10,13 +10,17 @@ import { parseClock } from "./src/parseClock.js";
 import { parseSchema } from "./src/parseSchema.js";
 
 export async function action(options: CSVRunOptions ) {
-  // @substreams/manifest issue
-  // if manifest is local, add current directory
-  if (!isRemotePath(options.manifest) && !path.isAbsolute(options.manifest)) {
-    const currentDir = process.cwd();
-    options.manifest = path.join(currentDir, options.manifest);
+  // handle file system manifest
+  // can be removed when issue resolved
+  // https://github.com/substreams-js/substreams-js/issues/62
+  if (!isRemotePath(options.manifest)) {
+    // if manifest is not absolute, add current directory
+    if ( !path.isAbsolute(options.manifest)) {
+      const currentDir = process.cwd();
+      options.manifest = path.join(currentDir, options.manifest);
+    }
+    if ( !fs.existsSync(options.manifest) ) throw new Error(`Manifest file not found: ${options.manifest}`);
   }
-  if ( !fs.existsSync(options.manifest) ) throw new Error(`Manifest file not found: ${options.manifest}`);
 
   // SQL schema
   if ( !fs.existsSync(options.schema) ) throw new Error(`Schema file not found: ${options.schema}`);
