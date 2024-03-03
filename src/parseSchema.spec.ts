@@ -15,6 +15,7 @@ test("parseColumn", () => {
     expect(parseColumn("timestamp INTEGER")).toBe("timestamp");
     expect(parseColumn("\"timestamp\" INTEGER")).toBe("timestamp");
     expect(parseColumn("'timestamp' INTEGER")).toBe("timestamp");
+    expect(parseColumn("`timestamp` INTEGER")).toBe("timestamp");
 
     // empty columns
     expect(parseColumn(");")).toBe("");

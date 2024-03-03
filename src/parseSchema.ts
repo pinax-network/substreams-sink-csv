@@ -59,6 +59,6 @@ export function parseColumn(statement: string) {
 // remove quotes
 export function preParseStatement(statement: string) {
     return statement
-        .replace(/[,;\'\"]/g, '')
+        .replace(/[,;\'\"`]/g, '')
         .trim()
 }
