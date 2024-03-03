@@ -1,9 +1,8 @@
-{
+  {
     "compilerOptions": {
       "target": "ESNext",
       "module": "NodeNext",
       "moduleResolution": "NodeNext",
-      "resolveJsonModule": true,
       "declaration": true,
       "declarationMap": true,
       "sourceMap": true,
@@ -13,11 +12,11 @@
       "strictNullChecks": true,
       "alwaysStrict": true,
       "skipLibCheck": true,
-      "types": ["bun-types"]
+      "types": ["@types/bun"]
     },
     "include": [
       "index-csv.ts",
       "src",
-      "bin/cli.ts"
+      "bin/cli.mts"
     ]
-}
+  }

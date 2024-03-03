@@ -1,5 +1,5 @@
 import { readPackage } from "@substreams/manifest";
-import { CSVRunOptions } from "../bin/cli.js";
+import { CSVRunOptions } from "../bin/cli.mjs";
 import { createModuleHashHex } from "@substreams/core";
 
 export function isRemotePath(path: string): boolean {

@@ -3,16 +3,20 @@
 import { Option } from "commander";
 import { commander } from "substreams-sink";
 import { action } from "../index.js";
-import pkg from "../package.json" assert { type: "json" };
+import { version } from "../version.js";
 
 export interface CSVRunOptions extends commander.RunOptions {
   schema: string;
   filename?: string;
 }
 
+const name = "substreams-sink-csv";
+const description = "Substreams Sink CSV";
+const pkg = {name, version, description};
+
 // Run Webhook Sink
 const program = commander.program(pkg);
-const command = commander.addRunOptions(program, pkg, {metrics: false, http: false});
+const command = commander.addRunOptions(program, {metrics: false, http: false});
 command.addOption(new Option("--filename <string>", "CSV filename (default: '<endpoint>-<module_hash>-<module_name>.csv')").env("FILENAME"));
 command.addOption(new Option("--schema <string>", "SQL Table Schema for CSV").default("schema.sql").env("SCHEMA"));
 command.action(action);

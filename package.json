@@ -3,10 +3,8 @@
     "name": "substreams-sink-csv",
     "description": "Substreams Sink CSV",
     "type": "module",
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
     "bin": {
-        "substreams-sink-csv": "dist/bin/cli.js"
+        "substreams-sink-csv": "dist/bin/cli.mjs"
     },
     "author": {
         "name": "Denis",
@@ -14,19 +12,13 @@
     },
     "files": [
         "index.ts",
+        "version.ts",
         "dist",
+        "bin",
         "src"
     ],
-    "sideEffects": false,
-    "exports": {
-        ".": {
-            "types": "./dist/index.d.ts",
-            "import": "./dist/index.js",
-            "default": "./dist/index.js"
-        }
-    },
     "scripts": {
-        "start": "tsc && node ./dist/bin/cli.js",
+        "start": "tsc && node ./dist/bin/cli.mjs",
         "test": "bun test",
         "posttest": "tsc --noEmit",
         "prepublishOnly": "tsc"

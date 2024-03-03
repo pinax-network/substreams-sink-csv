@@ -1,8 +1,8 @@
 import fs from "fs";
 import path from "path";
-import pkg from "./package.json" assert { type: "json" };
+import { version } from './version.js'
 import { setup, fileCursor } from "substreams-sink";
-import { CSVRunOptions } from "./bin/cli.js"
+import { CSVRunOptions } from "./bin/cli.mjs"
 import { EntityChanges, getValuesInEntityChange } from "@substreams/sink-entity-changes/zod"
 import logUpdate from "log-update";
 import { getModuleHash, isRemotePath } from "./src/getModuleHash.js";
@@ -11,7 +11,7 @@ import { parseClock } from "./src/parseClock.js";
 import { parseSchema } from "./src/parseSchema.js";
 
 export async function action(options: CSVRunOptions ) {
-  console.log(`[substreams-sink-csv] v${pkg.version}`);
+  console.log(`[substreams-sink-csv] v${version}`);
 
   // handle file system manifest
   // can be removed when issue resolved
