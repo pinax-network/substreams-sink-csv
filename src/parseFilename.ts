@@ -1,6 +1,6 @@
 import path from "path";
 import fs from "fs";
-import { CSVRunOptions } from "../bin/cli.js";
+import { CSVRunOptions } from "../bin/cli.mjs";
 
 export function parseFilename(moduleHash: string, options: CSVRunOptions) {
   // user provided filename
