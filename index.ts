@@ -66,6 +66,9 @@ export async function action(options: CSVRunOptions ) {
   let resolvedStartBlock = 0;
   let maxParallelWorkers = 0;
   let runningJobs = 0;
+  let last_seconds = 0;
+  let start = Math.floor(Date.now() / 1000); // seconds
+  let last_update = 0;
 
   emitter.on("session", (session) => {
     fs.writeFileSync(sessionFile, JSON.stringify(session, null, 2));
@@ -96,6 +99,7 @@ export async function action(options: CSVRunOptions ) {
     const { block_num, block_id, timestamp, seconds } = parseClock(clock);
     last_block_num = block_num;
     last_timestamp = timestamp;
+    last_seconds = seconds;
 
     // block header
     for ( const entityChange of EntityChanges.parse(data).entityChanges ) {
@@ -132,7 +136,12 @@ export async function action(options: CSVRunOptions ) {
   });
 
   function log() {
-    logUpdate(JSON.stringify({last_block_num, last_timestamp, blocks, rows, totalBytesRead, totalBytesWritten, runningJobs}));
+    const now = Math.floor(Date.now() / 1000);
+    if ( last_update != now) {
+      last_update = now;
+      const blocksPerSecond = Math.floor(blocks / (last_update - start));
+      logUpdate(JSON.stringify({last_block_num, last_timestamp, blocks, rows, blocksPerSecond, totalBytesRead, totalBytesWritten, runningJobs}));
+    }
   }
 
   fileCursor.onCursor(emitter, cursorFile);
