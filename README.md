@@ -43,6 +43,8 @@ MANIFEST=https://github.com/streamingfast/substreams-eth-block-meta/releases/dow
 MODULE_NAME=graph_out
 SUBSTREAMS_ENDPOINT=eth.substreams.pinax.network:443
 SCHEMA=schema.example.sql
+FINAL_BLOCKS_ONLY=true
+START_BLOCK=2
 ```
 **CLI** with `.env` file
 ```bash
@@ -106,4 +108,36 @@ Options:
   --filename <string>                CSV filename (default: '<endpoint>-<module_hash>-<module_name>.csv') (env: FILENAME)
   --schema <string>                  SQL Table Schema for CSV (default: "schema.sql", env: SCHEMA)
   -h, --help                         display help for command
+```
+
+## Using `pm2`
+
+**Install pm2**
+```bash
+$ npm install -g pm2
+$ npm install substreams-sink-csv
+```
+
+**ecosystem.config.js**
+```js
+module.exports = {
+    apps: [{
+        name: "substreams-sink-csv",
+        script: "./node_modules/substreams-sink-csv/dist/bin/cli.mjs",
+        env: {
+            SUBSTREAMS_API_KEY: '<your-api-key>',
+            MANIFEST: 'https://github.com/streamingfast/substreams-eth-block-meta/releases/download/v0.5.1/substreams-eth-block-meta-v0.5.1.spkg',
+            MODULE_NAME: 'graph_out',
+            SUBSTREAMS_ENDPOINT: 'eth.substreams.pinax.network:443',
+            FINAL_BLOCKS_ONLY: 'true',
+            START_BLOCK: '2',
+            SCHEMA: 'schema.example.sql',
+        }
+    }]
+}
+```
+
+**Start the process**
+```bash
+$ pm2 start
 ```
