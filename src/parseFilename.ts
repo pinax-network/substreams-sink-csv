@@ -12,16 +12,17 @@ export function parseFilename(moduleHash: string, options: CSVRunOptions) {
     const cursorFile = `${name}.cursor`;
     const clockFile = `${name}.clock`;
     const sessionFile = `${name}.session`;
-    return { name, cursorFile, clockFile, sessionFile };
+    return { name, dirname, cursorFile, clockFile, sessionFile };
   }
 
   // auto-generate filename (<network>-<moduleHash>-<moduleName>.csv)
   const network = parseNetwork(options.substreamsEndpoint);
   const name = `${network}-${moduleHash}-${options.moduleName}`
+  const dirname = import.meta.dirname;
   const cursorFile = `${name}.cursor`;
   const clockFile = `${name}.clock`;
   const sessionFile = `${name}.session`;
-  return { name, cursorFile, clockFile, sessionFile };
+  return { name, dirname, cursorFile, clockFile, sessionFile };
 }
 
 export function parseNetwork(endpoint: string) {
