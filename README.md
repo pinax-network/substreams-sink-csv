@@ -44,14 +44,26 @@ CREATE TABLE block_meta
 
 **.env**
 ```env
+# Substreams Credentials
+# https://app.pinax.network
+# https://app.streamingfast.io
 SUBSTREAMS_API_KEY=<your-api-key>
-MANIFEST=https://github.com/streamingfast/substreams-eth-block-meta/releases/download/v0.5.1/substreams-eth-block-meta-v0.5.1.spkg
-MODULE_NAME=graph_out
 SUBSTREAMS_ENDPOINT=eth.substreams.pinax.network:443
-SCHEMA=schema.example.sql
+
+# Substreams Package
+MANIFEST=https://spkg.io/streamingfast/substreams-eth-block-meta-v0.4.3.spkg
+MODULE_NAME=graph_out
+
+# Substreams Package (Optional)
+START_BLOCK=-7200
 FINAL_BLOCKS_ONLY=true
-START_BLOCK=2
+
+# CSV Input
+SCHEMA=schema.example.block_meta.sql
+
+# CSV Output (Optional)
 DELIMITER=","
+FILENAME="data.csv"
 ```
 **CLI** with `.env` file
 ```bash
@@ -59,7 +71,12 @@ $ substreams-sink-csv
 ```
 **CLI** with `params`
 ```bash
-$ substreams-sink-csv --schema schema.example.sql -e eth.substreams.pinax.network:443 --module-name graph_out --manifest https://github.com/streamingfast/substreams-eth-block-meta/releases/download/v0.5.1/substreams-eth-block-meta-v0.5.1.spkg --substreams-api-key <your-api-key>
+$ substreams-sink-csv \
+    -e eth.substreams.pinax.network:443 \
+    --schema schema.example.block_meta.sql \
+    --module-name graph_out \
+    --manifest https://spkg.io/streamingfast/substreams-eth-block-meta-v0.4.3.spkg \
+    --substreams-api-key <your-api-key>
 ```
 
 ### Substreams Support
@@ -71,13 +88,13 @@ $ substreams-sink-csv --schema schema.example.sql -e eth.substreams.pinax.networ
 
 ### CSV filename schema
 
-The CSV filename is generated using the following pattern:
+If `FILENAME` is not provided, the CSV output filename is generated using the following pattern:
 
 ```yml
 <endpoint>-<module_hash>-<module_name>-<entity>.csv
 ```
 
-Additionally, `*.clock` & `*.cursor` files are generated to keep track of the last block processed.
+Additionally, `*.clock`, `*.session` & `*.cursor` files are generated to keep track of the last block processed.
 
 **Example:**
 
@@ -133,12 +150,7 @@ module.exports = {
         script: "./node_modules/substreams-sink-csv/dist/bin/cli.mjs",
         env: {
             SUBSTREAMS_API_KEY: '<your-api-key>',
-            MANIFEST: 'https://github.com/streamingfast/substreams-eth-block-meta/releases/download/v0.5.1/substreams-eth-block-meta-v0.5.1.spkg',
-            MODULE_NAME: 'graph_out',
-            SUBSTREAMS_ENDPOINT: 'eth.substreams.pinax.network:443',
-            FINAL_BLOCKS_ONLY: 'true',
-            START_BLOCK: '2',
-            SCHEMA: 'schema.example.sql',
+            ...
         }
     }]
 }
@@ -187,14 +199,14 @@ ORDER BY block_num;
 > To import data from the CSV file to the `block_meta` table, we can pipe our file directly to the clickhouse-client:
 
 ```bash
-$ clickhouse-client --query="INSERT INTO block_meta FORMAT CSV" < eth.substreams.pinax.network-3b180e1d2390afef1f22651581304e04245ba001-graph_out-block_meta.csv
+$ clickhouse-client --query="INSERT INTO block_meta FORMAT CSV" < data-block_meta.csv
 ```
 
 > Note that we use `FORMAT CSV` to let ClickHouse know we’re ingesting CSV formatted data. Alternatively, we can load data from a local file using the `FROM INFILE` clause:
 
 ```sql
 INSERT INTO block_meta
-FROM INFILE 'eth.substreams.pinax.network-3b180e1d2390afef1f22651581304e04245ba001-graph_out-block_meta.csv'
+FROM INFILE 'data-block_meta.csv'
 FORMAT CSV
 ```
 
