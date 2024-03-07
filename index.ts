@@ -10,6 +10,7 @@ import { parseFilename } from "./src/parseFilename.js";
 import { parseClock } from "./src/parseClock.js";
 import { parseSchema } from "./src/parseSchema.js";
 import { writeRow } from "./src/writeRow.js";
+import { applyReservedFields } from "./src/applyReservedFields.js";
 
 export async function action(options: CSVRunOptions ) {
   console.log(`[substreams-sink-csv] v${version}`);
@@ -97,7 +98,7 @@ export async function action(options: CSVRunOptions ) {
 
   // Stream Messages
   emitter.on("anyMessage", async (data, cursor, clock) => {
-    const { block_number, block_id, timestamp, seconds, milliseconds, nanos } = parseClock(clock);
+    const { block_number, timestamp, seconds } = parseClock(clock);
     last_block_number = block_number;
     last_timestamp = timestamp;
     last_seconds = seconds;
@@ -108,21 +109,7 @@ export async function action(options: CSVRunOptions ) {
       const table = tables.get(entityChange.entity);
       if ( !writer || !table ) throw new Error(`Table not found: ${entityChange.entity}`);
       const values = getValuesInEntityChange(entityChange);
-
-      // **Reserved field names** to be used to expand the schema
-      values["id"] = entityChange.id;
-      values["cursor"] = cursor;
-      values["operation"] = entityChange.operation;
-      values["block"] = block_number;
-      values["block_num"] = block_number;
-      values["block_number"] = block_number;
-      values["block_id"] = block_id;
-      values["timestamp"] = timestamp;
-      values["seconds"] = seconds;
-      values["milliseconds"] = milliseconds;
-      values["millis"] = milliseconds;
-      values["nanos"] = nanos;
-      values["nanoseconds"] = nanos;
+      applyReservedFields(values, entityChange, cursor, clock);
 
       // order values based on table
       const data = table.map((column) => {
