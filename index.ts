@@ -35,9 +35,9 @@ export async function action(options: CSVRunOptions ) {
   // Cursor
   const moduleHash = await getModuleHash(options);
   console.log(JSON.stringify({manifest: options.manifest, moduleName: options.moduleName, moduleHash}));
-  const { name, cursorFile, clockFile, sessionFile } = parseFilename(moduleHash, options);
+  const { name, dirname, cursorFile, clockFile, sessionFile } = parseFilename(moduleHash, options);
   const startCursor = fs.existsSync(cursorFile) ? fs.readFileSync(cursorFile, "utf8") : '';
-  console.log(JSON.stringify({name, cursorFile, clockFile, sessionFile}));
+  console.log(JSON.stringify({name, dirname, cursorFile, clockFile, sessionFile}));
 
   // CSV writer (append)
   const clockWriter = fs.createWriteStream(clockFile, {flags: "a"});

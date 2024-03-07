@@ -232,3 +232,20 @@ SELECT * FROM block_meta LIMIT 10;
 
 10 rows in set. Elapsed: 0.001 sec. Processed 8.19 thousand rows, 1.18 MB (5.51 million rows/s., 793.31 MB/s.)
 ```
+
+## Docker environment
+
+Pull from GitHub Container registry
+```bash
+docker pull ghcr.io/pinax-network/substreams-sink-csv:latest
+```
+
+Run with `.env` file
+```bash
+docker run -it --rm --env-file .env -v $PWD:/home ghcr.io/pinax-network/substreams-sink-csv:latest
+```
+
+Build from source
+```bash
+docker build -t substreams-sink-csv .
+```
