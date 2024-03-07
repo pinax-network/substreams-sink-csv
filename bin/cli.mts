@@ -8,6 +8,7 @@ import { version } from "../version.js";
 export interface CSVRunOptions extends commander.RunOptions {
   schema: string;
   filename?: string;
+  delimiter: string;
 }
 
 const name = "substreams-sink-csv";
@@ -18,7 +19,8 @@ const pkg = {name, version, description};
 const program = commander.program(pkg);
 const command = commander.addRunOptions(program, {metrics: false, http: false});
 command.addOption(new Option("--filename <string>", "CSV filename (default: '<endpoint>-<module_hash>-<module_name>.csv')").env("FILENAME"));
-command.addOption(new Option("--schema <string>", "SQL Table Schema for CSV").default("schema.sql").env("SCHEMA"));
+command.addOption(new Option("--schema <string>", "SQL table schema for CSV").default("schema.sql").env("SCHEMA"));
+command.addOption(new Option("--delimiter <string>", "CSV delimiter").default(",").env("DELIMITER"));
 command.action(action);
 
 program.parse();

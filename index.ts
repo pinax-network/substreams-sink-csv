@@ -9,6 +9,7 @@ import { getModuleHash, isRemotePath } from "./src/getModuleHash.js";
 import { parseFilename } from "./src/parseFilename.js";
 import { parseClock } from "./src/parseClock.js";
 import { parseSchema } from "./src/parseSchema.js";
+import { writeRow } from "./src/writeRow.js";
 
 export async function action(options: CSVRunOptions ) {
   console.log(`[substreams-sink-csv] v${version}`);
@@ -58,7 +59,7 @@ export async function action(options: CSVRunOptions ) {
   // log stats
   let rows = 0;
   let blocks = 0;
-  let last_block_num = 0;
+  let last_block_number = 0;
   let last_timestamp = "";
   let totalBytesRead = 0;
   let totalBytesWritten = 0;
@@ -90,14 +91,14 @@ export async function action(options: CSVRunOptions ) {
   emitter.on("clock", (clock) => {
     // write block to file
     // used to track how many blocks have been processed per module
-    const { block_num, block_id, seconds, timestamp } = parseClock(clock);
-    clockWriter.write([block_num, block_id, seconds, timestamp].join(",") + '\n');
+    const { block_number, block_id, seconds, timestamp } = parseClock(clock);
+    writeRow(clockWriter, [block_number, block_id, seconds, timestamp], options)
   });
 
   // Stream Messages
   emitter.on("anyMessage", async (data, cursor, clock) => {
-    const { block_num, block_id, timestamp, seconds } = parseClock(clock);
-    last_block_num = block_num;
+    const { block_number, block_id, timestamp, seconds, milliseconds, nanos } = parseClock(clock);
+    last_block_number = block_number;
     last_timestamp = timestamp;
     last_seconds = seconds;
 
@@ -112,21 +113,25 @@ export async function action(options: CSVRunOptions ) {
       values["id"] = entityChange.id;
       values["cursor"] = cursor;
       values["operation"] = entityChange.operation;
+      values["block"] = block_number;
+      values["block_num"] = block_number;
+      values["block_number"] = block_number;
       values["block_id"] = block_id;
-      values["block_num"] = block_num;
       values["timestamp"] = timestamp;
       values["seconds"] = seconds;
+      values["milliseconds"] = milliseconds;
+      values["millis"] = milliseconds;
+      values["nanos"] = nanos;
+      values["nanoseconds"] = nanos;
 
       // order values based on table
       const data = table.map((column) => {
-        const value = values[column];
-        if ( value === undefined ) return null;
-        if ( typeof value == "string" && value.includes(",") ) return `"${value}"`; // escape commas
+        const value = values[column] as unknown;
         return value;
       });
 
       // save CSV row
-      writer.write(data.join(",") + "\n");
+      writeRow(writer, data, options);
       rows++;
     };
 
@@ -140,7 +145,7 @@ export async function action(options: CSVRunOptions ) {
     if ( last_update != now) {
       last_update = now;
       const blocksPerSecond = Math.floor(blocks / (last_update - start));
-      logUpdate(JSON.stringify({last_block_num, last_timestamp, blocks, rows, blocksPerSecond, totalBytesRead, totalBytesWritten, runningJobs}));
+      logUpdate(JSON.stringify({last_block_number, last_timestamp, blocks, rows, blocksPerSecond, totalBytesRead, totalBytesWritten, runningJobs}));
     }
   }
 
