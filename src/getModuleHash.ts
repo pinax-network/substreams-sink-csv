@@ -17,7 +17,7 @@ export async function getModuleHash(options: CSVRunOptions) {
     for ( const module of substreamPackage.modules.modules ) {
       if ( module.name === options.moduleName ) {
         if ( !module.output ) throw new Error("Module has no output");
-        if ( module.output.type !== "proto:sf.substreams.sink.entity.v1.EntityChanges" ) throw new Error("Module output is not EntityChanges");
+        if ( !module.output.type.includes("entity.v1.EntityChanges") ) throw new Error("Module output is not EntityChanges");
         valid = true;
       }
     }

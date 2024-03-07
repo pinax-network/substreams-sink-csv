@@ -1,5 +1,5 @@
 {
-    "version": "0.2.10",
+    "version": "0.2.11",
     "name": "substreams-sink-csv",
     "description": "Substreams Sink CSV",
     "type": "module",
@@ -24,7 +24,7 @@
         "prepublishOnly": "tsc"
     },
     "dependencies": {
-        "@substreams/sink-entity-changes": "^0.3.9",
+        "@substreams/sink-entity-changes": "^0.3.11",
         "log-update": "latest",
         "substreams-sink": "^0.16.0"
     },
