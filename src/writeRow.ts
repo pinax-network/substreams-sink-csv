@@ -9,8 +9,12 @@ export function writeRow(writer: fs.WriteStream, columns: any[], options: WriteR
     writer.write(columns.join(options.delimiter) + '\n');
 }
 
-export function formatValue(value: string|undefined|null, options: WriteRowOptions): string {
+export function formatValue(value: string|undefined|null|object, options: WriteRowOptions): string {
     if (value === undefined || value === null) return "";
+
+    if (typeof value == "object") {
+        value = JSON.stringify(value);
+    }
 
     if (typeof value == "string") {
         value = value.replace(/"/g, "\"\"")

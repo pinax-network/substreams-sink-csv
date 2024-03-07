@@ -107,7 +107,7 @@ export async function action(options: CSVRunOptions ) {
     for ( const entityChange of EntityChanges.parse(data).entityChanges ) {
       const writer = writers.get(entityChange.entity);
       const table = tables.get(entityChange.entity);
-      if ( !writer || !table ) throw new Error(`Table not found: ${entityChange.entity}`);
+      if ( !writer || !table ) continue; // skip if table not found
       const values = getValuesInEntityChange(entityChange);
       applyReservedFields(values, entityChange, cursor, clock);
 
