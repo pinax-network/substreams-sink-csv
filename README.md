@@ -21,13 +21,19 @@ CREATE TABLE block_meta
 
 **Reserved field names** to be used to expand the schema:
 
-- `id` (TEXT NOT NULL PRIMARY KEY)
-- `block_num` (BIGINT)
-- `block_id` (TEXT)
-- `cursor` (TEXT)
-- `timestamp` (TIMESTAMP)
-- `seconds` (BIGINT)
-- `operation` (TEXT)
+- `id` (String)
+- `block_number` (UInt64)
+  - `block`
+  - `block_num`
+- `block_id` (String)
+- `cursor` (String)
+- `timestamp` (DateTime)
+- `seconds` (Int64)
+- `nanos` (Int32)
+    - `nanoseconds`
+- `milliseconds` (Int64)
+    - `millis`
+- `operation` (String)
 
 ### Get Substreams API Key
 
@@ -45,6 +51,7 @@ SUBSTREAMS_ENDPOINT=eth.substreams.pinax.network:443
 SCHEMA=schema.example.sql
 FINAL_BLOCKS_ONLY=true
 START_BLOCK=2
+DELIMITER=","
 ```
 **CLI** with `.env` file
 ```bash
@@ -85,8 +92,6 @@ eth.substreams.pinax.network-3b180e1d2390afef1f22651581304e04245ba001-graph_out.
 ```bash
 $ substreams-sink-csv --help
 
-Usage: substreams-sink-csv run [options]
-
 Substreams Sink CSV
 
 Options:
@@ -100,13 +105,15 @@ Options:
   --substreams-api-key <string>      API key for the Substream endpoint (env: SUBSTREAMS_API_KEY)
   --delay-before-start <int>         Delay (ms) before starting Substreams (default: 0, env: DELAY_BEFORE_START)
   --cursor <string>                  Cursor to stream from. Leave blank for no cursor
-  --production-mode <boolean>        Enable production mode, allows cached Substreams data if available (default: "false", env: PRODUCTION_MODE)
+  --production-mode <boolean>        Enable production mode, allows cached Substreams data if available (choices: "true", "false", default: false, env: PRODUCTION_MODE)
+  --final-blocks-only <boolean>      Only process blocks that have pass finality, to prevent any reorg and undo signal by staying further away from the chain HEAD (choices: "true", "false", default: false, env: FINAL_BLOCKS_ONLY)
   --inactivity-seconds <int>         If set, the sink will stop when inactive for over a certain amount of seconds (default: 300, env: INACTIVITY_SECONDS)
   --headers [string...]              Set headers that will be sent on every requests (ex: --headers X-HEADER=headerA) (default: {}, env: HEADERS)
-  --final-blocks-only <boolean>      Only process blocks that have pass finality, to prevent any reorg and undo signal by staying further away from the chain HEAD (default: "false", env: FINAL_BLOCKS_ONLY)
-  --verbose <boolean>                Enable verbose logging (default: "false", env: VERBOSE)
+  --plaintext <boolean>              Establish GRPC connection in plaintext (choices: "true", "false", default: false, env: PLAIN_TEXT)
+  --verbose <boolean>                Enable verbose logging (choices: "true", "false", default: false, env: VERBOSE)
   --filename <string>                CSV filename (default: '<endpoint>-<module_hash>-<module_name>.csv') (env: FILENAME)
-  --schema <string>                  SQL Table Schema for CSV (default: "schema.sql", env: SCHEMA)
+  --schema <string>                  SQL table schema for CSV (default: "schema.sql", env: SCHEMA)
+  --delimiter <string>               CSV delimiter (default: ",", env: DELIMITER)
   -h, --help                         display help for command
 ```
 
@@ -140,4 +147,76 @@ module.exports = {
 **Start the process**
 ```bash
 $ pm2 start
+```
+
+## Loading CSV Data into ClickHouse
+
+[**Quick Install**](https://clickhouse.com/docs/en/install)
+```bash
+$ curl https://clickhouse.com/ | sh
+```
+
+**Start ClickHouse**
+```bash
+$ clickhouse server
+```
+
+**Connect to ClickHouse**
+```bash
+$ clickhouse client
+```
+
+**Create a ClickHouse table**
+
+> Before importing data, let’s create a table with a relevant structure:
+```sql
+CREATE TABLE block_meta
+(
+    block_num   UInt64,
+    timestamp   DateTime,
+    id          String,
+    hash        String,
+    parent_hash String
+)
+ENGINE = ReplacingMergeTree()
+ORDER BY block_num;
+```
+
+[**Load CSV data into ClickHouse**](https://clickhouse.com/docs/en/integrations/data-formats/csv-tsv)
+
+> To import data from the CSV file to the `block_meta` table, we can pipe our file directly to the clickhouse-client:
+
+```bash
+$ clickhouse-client --query="INSERT INTO block_meta FORMAT CSV" < eth.substreams.pinax.network-3b180e1d2390afef1f22651581304e04245ba001-graph_out-block_meta.csv
+```
+
+> Note that we use `FORMAT CSV` to let ClickHouse know we’re ingesting CSV formatted data. Alternatively, we can load data from a local file using the `FROM INFILE` clause:
+
+```sql
+INSERT INTO block_meta
+FROM INFILE 'eth.substreams.pinax.network-3b180e1d2390afef1f22651581304e04245ba001-graph_out-block_meta.csv'
+FORMAT CSV
+```
+
+**Query the ClickHouse table**
+
+```sql
+SELECT * FROM block_meta LIMIT 10;
+```
+
+```yml
+┌─block_num─┬───────────timestamp─┬─id────────────────┬─hash─────────────────────────────────────────┬─parent_hash──────────────────────────────────┐
+│         2 │ 2015-07-30 15:26:57 │ day:last:20150730 │ tJWh1+ZmMVKuknCNpIQzN7lYFGAVooAvQZOkEARGmMk= │ iOltRTe+pNnAXRJUmQezJWHTvzH0Wq5zTNwRnxNAbLY= │
+│         3 │ 2015-07-30 15:27:28 │ day:last:20150730 │ PWEiZgzIJDdvEe6EL4Ot3DUl4t1nVrm88K/6aqiM90E= │ tJWh1+ZmMVKuknCNpIQzN7lYFGAVooAvQZOkEARGmMk= │
+│         4 │ 2015-07-30 15:27:57 │ day:last:20150730 │ I631o74PUjWzaUG8sptiUEJ47Fuc36J3uZK6Sno806I= │ PWEiZgzIJDdvEe6EL4Ot3DUl4t1nVrm88K/6aqiM90E= │
+│         5 │ 2015-07-30 15:28:03 │ day:last:20150730 │ 83xjLTYeCpPwi6KbGixwjZyqPuGdHujSoCYSv/5J8Kk= │ I631o74PUjWzaUG8sptiUEJ47Fuc36J3uZK6Sno806I= │
+│         6 │ 2015-07-30 15:28:27 │ day:last:20150730 │ HxrtjjaUoGdJbCSOYYec2pmwcJod+6zQtpN1DfBrMm4= │ 83xjLTYeCpPwi6KbGixwjZyqPuGdHujSoCYSv/5J8Kk= │
+│         7 │ 2015-07-30 15:28:30 │ day:last:20150730 │ 4MfAtG4Ra4dDVNzm9kuFgb0jkYawPzCpeOPcOGVvcjo= │ HxrtjjaUoGdJbCSOYYec2pmwcJod+6zQtpN1DfBrMm4= │
+│         8 │ 2015-07-30 15:28:32 │ day:last:20150730 │ LOlDQt8Ya6tBZcJoxDq5gtNgyUdPQp/sVWWt/F0fJYs= │ 4MfAtG4Ra4dDVNzm9kuFgb0jkYawPzCpeOPcOGVvcjo= │
+│         9 │ 2015-07-30 15:28:35 │ day:last:20150730 │ mX5Hv0ysUJxid1PAY4WshmZB7G+INzT/eURBEADcV24= │ LOlDQt8Ya6tBZcJoxDq5gtNgyUdPQp/sVWWt/F0fJYs= │
+│        10 │ 2015-07-30 15:28:48 │ day:last:20150730 │ T/SjiyeKtJ93OdOk7U4ScUOGqf33IZLy6PfaeCLxC00= │ mX5Hv0ysUJxid1PAY4WshmZB7G+INzT/eURBEADcV24= │
+│        11 │ 2015-07-30 15:28:56 │ day:last:20150730 │ P151bD78uTCZNht93Q2r/qpZJDlDfByDbkQ8y4HpMkI= │ T/SjiyeKtJ93OdOk7U4ScUOGqf33IZLy6PfaeCLxC00= │
+└───────────┴─────────────────────┴───────────────────┴──────────────────────────────────────────────┴──────────────────────────────────────────────┘
+
+10 rows in set. Elapsed: 0.001 sec. Processed 8.19 thousand rows, 1.18 MB (5.51 million rows/s., 793.31 MB/s.)
 ```
