@@ -1,4 +1,7 @@
-export function parseSchema(sql: string) {
+import { Schema } from "./loadSchema.js";
+
+// parse schema from SQL file
+export function parseSchema(sql: string): Schema {
     const tables = new Map<string, string[]>(); // <table, columns>
     const statements = sql.split(";")
 

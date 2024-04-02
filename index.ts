@@ -5,12 +5,12 @@ import { setup, fileCursor } from "substreams-sink";
 import { CSVRunOptions } from "./bin/cli.mjs"
 import { EntityChanges, getValuesInEntityChange } from "@substreams/sink-entity-changes/zod"
 import logUpdate from "log-update";
-import { getModuleHash, isRemotePath } from "./src/getModuleHash.js";
 import { parseFilename } from "./src/parseFilename.js";
 import { parseClock } from "./src/parseClock.js";
-import { parseSchema } from "./src/parseSchema.js";
 import { writeRow } from "./src/writeRow.js";
 import { applyReservedFields } from "./src/applyReservedFields.js";
+import { OutputType, loadSchema } from "./src/loadSchema.js";
+import { isRemotePath } from "./src/isRemotePath.js";
 
 export async function action(options: CSVRunOptions ) {
   console.log(`[substreams-sink-csv] v${version}`);
@@ -27,13 +27,9 @@ export async function action(options: CSVRunOptions ) {
     if ( !fs.existsSync(options.manifest) ) throw new Error(`Manifest file not found: ${options.manifest}`);
   }
 
-  // SQL schema
-  if ( !fs.existsSync(options.schema) ) throw new Error(`Schema file not found: ${options.schema}`);
-  const schema = fs.readFileSync(options.schema, "utf8");
-  const tables = parseSchema(schema);
+  const { tables, moduleHash, dataType } = await loadSchema(options);
 
   // Cursor
-  const moduleHash = await getModuleHash(options);
   console.log(JSON.stringify({manifest: options.manifest, moduleName: options.moduleName, moduleHash}));
   const { name, dirname, cursorFile, clockFile, sessionFile } = parseFilename(moduleHash, options);
   const startCursor = fs.existsSync(cursorFile) ? fs.readFileSync(cursorFile, "utf8") : '';
@@ -103,24 +99,41 @@ export async function action(options: CSVRunOptions ) {
     last_timestamp = timestamp;
     last_seconds = seconds;
 
-    // block header
-    for ( const entityChange of EntityChanges.parse(data).entityChanges ) {
-      const writer = writers.get(entityChange.entity);
-      const table = tables.get(entityChange.entity);
-      if ( !writer || !table ) continue; // skip if table not found
-      const values = getValuesInEntityChange(entityChange);
-      applyReservedFields(values, entityChange, cursor, clock);
 
-      // order values based on table
-      const data = table.map((column) => {
-        const value = values[column] as unknown;
-        return value;
-      });
+    if (dataType == OutputType.EntityChanges) {
+      for ( const entityChange of EntityChanges.parse(data).entityChanges ) {
+        const writer = writers.get(entityChange.entity);
+        const table = tables.get(entityChange.entity);
+        if ( !writer || !table ) continue; // skip if table not found
+        const values = getValuesInEntityChange(entityChange);
+        applyReservedFields(values, entityChange, cursor, clock);
 
-      // save CSV row
-      writeRow(writer, data, options);
-      rows++;
-    };
+        // order values based on table
+        const data = table.map((column) => {
+          const value = values[column] as unknown;
+          return value;
+        });
+
+        // save CSV row
+        writeRow(writer, data, options);
+        rows++;
+      }
+    }
+    else if (dataType == OutputType.Proto){
+      for (const [table, columns] of tables) {
+        if ( !data[table] ) continue; // skip if empty
+        const writer = writers.get(table);
+        if ( !writer ) throw new Error(`Table not found: ${table}`);
+        for (const item of data[table] as Record<string, unknown>[]) {
+          const values = columns.map(column => item[column] ?? "");
+          writeRow(writer, values, options);
+          rows++;
+        }
+      }
+    }
+    else {
+      throw new Error(`Unknown output data type: ${dataType}`);
+    }
 
     // logging
     blocks++;

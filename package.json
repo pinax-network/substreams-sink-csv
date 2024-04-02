@@ -19,6 +19,11 @@
     ],
     "scripts": {
         "start": "tsc && node ./dist/bin/cli.mjs",
+        "start-uniswap-types": "tsc && node ./dist/bin/cli.mjs -e eth.substreams.pinax.network:443 --manifest https://github.com/streamingfast/substreams-uniswap-v3/releases/download/v0.2.8/substreams.spkg --module-name map_extract_data_types -s 12369821 -t +100",
+        "start-uniswap-pools": "tsc && node ./dist/bin/cli.mjs -e eth.substreams.pinax.network:443 --manifest https://github.com/streamingfast/substreams-uniswap-v3/releases/download/v0.2.8/substreams.spkg --module-name map_pools_created -s 12369821 -t +100",
+        "start-tokens-accounts": "tsc && node ./dist/bin/cli.mjs -e eos.substreams.pinax.network:443 --manifest https://github.com/pinax-network/substreams-antelope-tokens/releases/download/v0.3.8/antelope-tokens-v0.3.8.spkg --module-name map_accounts -s 1000000 -t +1000",
+        "start-tokens-entities": "tsc && node ./dist/bin/cli.mjs -e eos.substreams.pinax.network:443 --manifest https://github.com/pinax-network/substreams-antelope-tokens/releases/download/v0.3.8/antelope-tokens-v0.3.8.spkg --schema schema.example.tokens.sql --module-name graph_out -s 1000000 -t +1000",
+        "start-brc20-events": "tsc && node ./dist/bin/cli.mjs -e bitcoin.substreams.pinax.network:443 --manifest https://github.com/0xPlaygrounds/brc20-substreams/releases/download/v0.1.2/brc20-substreams-v0.1.2.spkg --module-name map_brc20_events -s 800000 -t +1000",
         "test": "bun test",
         "posttest": "tsc --noEmit",
         "prepublishOnly": "tsc"

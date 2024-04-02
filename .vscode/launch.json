@@ -1,0 +1,149 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug tokens_accounts",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "env": {
+            },
+            "program": "${workspaceFolder}/dist/bin/cli.mjs",
+            "args": [
+                "-e",
+                "eos.substreams.pinax.network:443",
+                "--manifest",
+                "https://github.com/pinax-network/substreams-antelope-tokens/releases/download/v0.3.8/antelope-tokens-v0.3.8.spkg",
+                "--module-name",
+                "map_accounts",
+                "-s",
+                "1000000",
+                "-t",
+                "+1000"
+            ],
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": [
+                "${workspaceFolder}/dist/**/*.js"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug uniswap.types",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "env": {
+            },
+            "program": "${workspaceFolder}/dist/bin/cli.mjs",
+            "args": [
+                "-e",
+                "eth.substreams.pinax.network:443",
+                "--manifest",
+                "https://github.com/streamingfast/substreams-uniswap-v3/releases/download/v0.2.10/substreams-uniswap-v3-v0.2.10.spkg",
+                "--module-name",
+                "uni_v0_2_9:map_extract_data_types",
+                "-s",
+                "12369700",
+                "-t",
+                "12369900",
+                "--inactivity-seconds",
+                "3000"
+            ],
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": [
+                "${workspaceFolder}/dist/**/*.js"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug uniswap.pools",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "env": {
+            },
+            "program": "${workspaceFolder}/dist/bin/cli.mjs",
+            "args": [
+                "-e",
+                "eth.substreams.pinax.network:443",
+                "--manifest",
+                "https://github.com/streamingfast/substreams-uniswap-v3/releases/download/v0.2.10/substreams-uniswap-v3-v0.2.10.spkg",
+                "--module-name",
+                "uni_v0_2_9:map_pools_created",
+                "-s",
+                "12369821",
+                "-t",
+                "12369921",
+                "--inactivity-seconds",
+                "3000"
+            ],
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": [
+                "${workspaceFolder}/dist/**/*.js"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug tokens_entities",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "env": {
+            },
+            "program": "${workspaceFolder}/dist/bin/cli.mjs",
+            "args": [
+                "-e",
+                "eos.substreams.pinax.network:443",
+                "--manifest",
+                "https://github.com/pinax-network/substreams-antelope-tokens/releases/download/v0.3.8/antelope-tokens-v0.3.8.spkg",
+                "--module-name",
+                "graph_out",
+                "--schema",
+                "./schema.example.tokens.sql",
+                "-s",
+                "1000000",
+                "-t",
+                "1001000"
+            ],
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": [
+                "${workspaceFolder}/dist/**/*.js"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug brc20_events",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "env": {
+            },
+            "program": "${workspaceFolder}/dist/bin/cli.mjs",
+            "args": [
+                "-e",
+                "bitcoin.substreams.pinax.network:443",
+                "--manifest",
+                "https://github.com/0xPlaygrounds/brc20-substreams/releases/download/v0.1.2/brc20-substreams-v0.1.2.spkg",
+                "--module-name",
+                "map_brc20_events",
+                "-s",
+                "800000",
+                "-t",
+                "801000"
+            ],
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": [
+                "${workspaceFolder}/dist/**/*.js"
+            ]
+        }
+    ]
+}
