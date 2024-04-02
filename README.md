@@ -1,4 +1,5 @@
 # Substreams Sink CSV
+CSV sink lets you consume the output of a substreams module and write it into CSV files.
 
 ### Install
 
@@ -6,41 +7,85 @@
 $ npm install -g substreams-sink-csv
 ```
 
-### SQL Table Schema
-**schema.sql**
-```sql
-CREATE TABLE block_meta
-(
-    block_num   BIGINT,
-    timestamp   TIMESTAMP,
-    id          TEXT,
-    hash        TEXT,
-    parent_hash TEXT
-);
-```
-
-**Reserved field names** to be used to expand the schema:
-
-- `id` (String)
-- `block_number` (UInt64)
-  - `block`
-  - `block_num`
-- `block_id` (String)
-- `cursor` (String)
-- `timestamp` (DateTime)
-- `seconds` (Int64)
-- `nanos` (Int32)
-    - `nanoseconds`
-- `milliseconds` (Int64)
-    - `millis`
-- `operation` (String)
-
-### Get Substreams API Key
+### Get Substreams API Key and endpoints
 
 - https://app.pinax.network
 - https://app.streamingfast.io/
 
-### Quickstart
+### Usage
+
+There are two ways to write your substreams module output into CSV file:
+- using untyped `graph_out` module producing `EntityChanges` output, and a schema defined in SQL file.
+- using any map module output, in which case the sink will use the types defined in the packaged `.proto` definitions.
+
+
+#### Using `EntityChanges` and schema
+
+1. Make sure your substreams package has `graph_out` with `EntityChanges` output. All substreams-based subgraphs have this.
+2. Define a schema
+
+    **schema.sql**
+    ```sql
+    CREATE TABLE block_meta
+    (
+        block_num   BIGINT,
+        timestamp   TIMESTAMP,
+        id          TEXT,
+        hash        TEXT,
+        parent_hash TEXT
+    );
+    ```
+    The tables and fields must match the entities and fields created in the `graph_out` module.
+    Note, you can use additional field names in your schema to enrich your rows from the stream metadata. The following field names can be used to expand the schema:
+
+   - `id` (String)
+   - `block_number` (UInt64)
+     - `block`
+     - `block_num`
+   - `block_id` (String)
+   - `cursor` (String)
+   - `timestamp` (DateTime)
+   - `seconds` (Int64)
+   - `nanos` (Int32)
+       - `nanoseconds`
+   - `milliseconds` (Int64)
+       - `millis`
+   - `operation` (String)
+3. Start the sink with command line parameters (or ENV variables - see below):
+    ```bash
+    $ substreams-sink-csv \
+        -e eth.substreams.pinax.network:443 \
+        --schema schema.example.block_meta.sql \
+        --module-name graph_out \
+        --manifest https://spkg.io/streamingfast/substreams-eth-block-meta-v0.4.3.spkg \
+        --substreams-api-key <your-api-key>
+        -s 10000 \
+        -t +100
+    ```
+
+#### Using repeated module output
+
+Your module could be producing repeated messages, i.e. have output protobuf definition such as this for example:
+```proto
+message Events {
+    repeated Transfer transfers = 1;
+    repeated Mint mints = 2;
+}
+```
+In this case, you can consume the module directly and the sink will use protobuf definitions to create the columns in your CSV file.
+In the example above you will get two CSV files: `transfers.csv` and `mints.csv` with columns defined in the `Transfer` and `Mint` messages accordingly.
+```bash
+$ substreams-sink-csv \
+    -e eth.substreams.pinax.network:443 \
+    --manifest https://github.com/streamingfast/substreams-uniswap-v3/releases/download/v0.2.8/substreams.spkg \
+    --module-name map_pools_created \
+    --substreams-api-key <your-api-key>
+    -s 12369821 \
+    -t +100
+```
+
+### Environment variables
+You can use environment variables instead of the CLI arguments. One way to use them is to provide `.env` file. For a full list of environment variables see `substreams-sink-csv --help`.
 
 **.env**
 ```env
@@ -64,20 +109,6 @@ SCHEMA=schema.example.block_meta.sql
 # CSV Output (Optional)
 DELIMITER=","
 FILENAME="data.csv"
-```
-**CLI** with `.env` file
-```bash
-$ substreams-sink-csv
-```
-**CLI** with `params`
-```bash
-$ substreams-sink-csv \
-    -e eth.substreams.pinax.network:443 \
-    --schema schema.example.block_meta.sql \
-    --module-name graph_out \
-    --manifest https://spkg.io/streamingfast/substreams-eth-block-meta-v0.4.3.spkg \
-    --substreams-api-key <your-api-key>
-```
 
 ### Substreams Support
 
