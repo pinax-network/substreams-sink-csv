@@ -78,8 +78,8 @@ export async function action(options: CSVRunOptions ) {
 
   emitter.on("progress", (progress) => {
     if ( progress.processedBytes ) {
-      totalBytesRead += Number(progress.processedBytes.totalBytesRead);
-      totalBytesWritten += Number(progress.processedBytes.totalBytesWritten);
+      totalBytesRead = Number(progress.processedBytes.totalBytesRead);
+      totalBytesWritten = Number(progress.processedBytes.totalBytesWritten);
       runningJobs = progress.runningJobs.length;
     }
     log();
