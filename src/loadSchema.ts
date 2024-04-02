@@ -18,7 +18,6 @@ export async function loadSchema(options: CSVRunOptions): Promise<{ tables: Sche
   const substreamPackage = await readPackage(options.manifest);
   if (!substreamPackage.modules) throw new Error("No modules found in substream package");
 
-  console.log("substreamPackage.modules", JSON.stringify(substreamPackage.modules.modules.map((module) => module.name ), null, 2))
   const module = substreamPackage.modules.modules.find((module) => module.name === options.moduleName);
   const hash = await createModuleHashHex(substreamPackage.modules, options.moduleName);
   let dataType = OutputType.Proto;
