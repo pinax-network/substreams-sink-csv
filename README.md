@@ -15,13 +15,13 @@ $ npm install -g substreams-sink-csv
 ### Usage
 
 There are two ways to write your substreams module output into CSV file:
-- using untyped `graph_out` module producing `EntityChanges` output, and a schema defined in SQL file.
+- using untyped `graph_out`/`db_out` modules producing `EntityChanges`/`DatabaseChanges` outputs, and a schema defined in SQL file.
 - using any map module output, in which case the sink will use the types defined in the packaged `.proto` definitions.
 
 
-#### Using `EntityChanges` and schema
+#### Using `EntityChanges`/`DatabaseChanges` and schema
 
-1. Make sure your substreams package has `graph_out` with `EntityChanges` output. All substreams-based subgraphs have this.
+1. Make sure your substreams package has `graph_out`/`db_out` with `EntityChanges`/`DatabaseChanges` output.
 2. Define a schema
 
     **schema.sql**
@@ -35,7 +35,7 @@ There are two ways to write your substreams module output into CSV file:
         parent_hash TEXT
     );
     ```
-    The tables and fields must match the entities and fields created in the `graph_out` module.
+    The tables and fields must match the entities and fields created in the `graph_out`/`db_out` module.
     Note, you can use additional field names in your schema to enrich your rows from the stream metadata. The following field names can be used to expand the schema:
 
    - `id` (String)
@@ -109,13 +109,6 @@ SCHEMA=schema.example.block_meta.sql
 # CSV Output (Optional)
 DELIMITER=","
 FILENAME="data.csv"
-
-### Substreams Support
-
-> Note: Support is only available for [`EntityChanges`](https://github.com/streamingfast/substreams-sink-entity-changes) using `graph_out` map module name.
-
-- [x] [`EntityChanges`](https://github.com/streamingfast/substreams-sink-entity-changes)
-- [ ] [`DatabaseChanges`](https://github.com/streamingfast/substreams-sink-database-changes)
 
 ### CSV filename schema
 
