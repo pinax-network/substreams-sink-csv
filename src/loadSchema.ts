@@ -7,6 +7,7 @@ import { parseSchemaFromProto } from "./parseSchemaFromProto.js";
 
 export enum OutputType {
   EntityChanges,
+  DatabaseChanges,
   Proto,
 }
 
@@ -21,11 +22,13 @@ export async function loadSchema(options: CSVRunOptions): Promise<{ tables: Sche
   const module = substreamPackage.modules.modules.find((module) => module.name === options.moduleName);
   const hash = await createModuleHashHex(substreamPackage.modules, options.moduleName);
   let dataType = OutputType.Proto;
-  if (module?.output?.type.includes("entity.v1.EntityChanges")) dataType = OutputType.EntityChanges;
+  const outputType = module?.output?.type ?? "";
+  if (outputType.includes("entity.v1.EntityChanges")) dataType = OutputType.EntityChanges;
+  if (outputType.includes("database.v1.DatabaseChanges")) dataType = OutputType.DatabaseChanges;
 
   let tables: Schema;
-  if (dataType === OutputType.EntityChanges) {
-    if (!options.schema || !fs.existsSync(options.schema)) throw new Error(`Schema file needed for EntityChanges output but not found: ${options.schema}`);
+  if ([OutputType.EntityChanges, OutputType.DatabaseChanges].includes(dataType)) {
+    if (!options.schema || !fs.existsSync(options.schema)) throw new Error(`Schema file needed for ${outputType} output but not found: ${options.schema}`);
     const schema = fs.readFileSync(options.schema, "utf8");
     tables = parseSchema(schema);
   }

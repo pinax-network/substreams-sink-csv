@@ -1,14 +1,22 @@
 import { Clock } from "@substreams/core/proto"
-import { EntityChange } from "@substreams/sink-entity-changes/zod";
 import { parseClock, parseTimestamp } from "./parseClock.js";
 import { Timestamp } from "@bufbuild/protobuf";
 
-export function applyReservedFields( values: Record<string, unknown>, entityChange: EntityChange, cursor: string, clock: Clock ) {
+type Metadata = {
+    id?: string;
+    pk?: string;
+    compositePk?: { keys: Record<string, string>; };
+    operation: string;
+}
+
+export function applyReservedFields( values: Record<string, unknown>, meta: Metadata, cursor: string, clock: Clock ) {
     const { block_number, block_id, timestamp, seconds, milliseconds, nanos } = parseClock(clock);
 
     // **Reserved field names** to be used to expand the schema
-    if ( !values["id"] ) values["id"] = entityChange.id;
-    if ( !values["operation"] ) values["operation"] = entityChange.operation;
+    if ( !values["id"] && meta.id ) values["id"] = meta.id;     // id for entity changes
+    if ( !values["id"] && meta.pk) values["id"] = meta.pk;      // id for db changes
+    if ( !values["id"] && meta.compositePk ) values["id"] = Object.entries(meta.compositePk.keys).sort((a,b) => a[0].localeCompare(b[0])).map(([k,v]) => `${k}:${v}`).join(";"); // id for composite pk
+    if ( !values["operation"] ) values["operation"] = meta.operation;
     if ( !values["cursor"] ) values["cursor"] = cursor;
     if ( !values["block"] ) values["block"] = block_number;
     if ( !values["block_num"] ) values["block_num"] = block_number;

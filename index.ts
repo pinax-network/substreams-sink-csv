@@ -4,6 +4,7 @@ import { version } from './version.js'
 import { setup, fileCursor } from "substreams-sink";
 import { CSVRunOptions } from "./bin/cli.mjs"
 import { EntityChanges, getValuesInEntityChange } from "@substreams/sink-entity-changes/zod"
+import { DatabaseChanges, TableChange } from "@substreams/sink-database-changes/zod"
 import logUpdate from "log-update";
 import { parseFilename } from "./src/parseFilename.js";
 import { parseClock } from "./src/parseClock.js";
@@ -109,10 +110,23 @@ export async function action(options: CSVRunOptions ) {
         applyReservedFields(values, entityChange, cursor, clock);
 
         // order values based on table
-        const data = table.map((column) => {
-          const value = values[column] as unknown;
-          return value;
-        });
+        const data = table.map((column) => values[column]);
+
+        // save CSV row
+        writeRow(writer, data, options);
+        rows++;
+      }
+    }
+    else if (dataType == OutputType.DatabaseChanges) { // skip if table not found
+      for ( const dbChange of DatabaseChanges.parse(data).tableChanges ) {
+        const writer = writers.get(dbChange.table);
+        const table = tables.get(dbChange.table);
+        if ( !writer || !table ) continue;
+        const values = getNewValuesInDatabaseChange(dbChange);
+        applyReservedFields(values, dbChange, cursor, clock);
+
+        // order columns based on table
+        const data = table.map((column) => values[column]);
 
         // save CSV row
         writeRow(writer, data, options);
@@ -151,4 +165,11 @@ export async function action(options: CSVRunOptions ) {
 
   fileCursor.onCursor(emitter, cursorFile);
   emitter.start();
+}
+
+function getNewValuesInDatabaseChange(dbChange: TableChange) {
+  return dbChange.fields.reduce((acc, cur) => {
+    acc[cur.name] = cur.newValue;
+    return acc;
+  }, {} as Record<string, unknown>);
 }

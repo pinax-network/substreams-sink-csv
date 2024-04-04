@@ -6,10 +6,14 @@
     "bin": {
         "substreams-sink-csv": "dist/bin/cli.mjs"
     },
-    "author": {
-        "name": "Denis",
-        "email": "denis@pinax.network"
-    },
+    "authors": [{
+            "name": "Denis",
+            "email": "denis@pinax.network"
+        }, {
+            "name": "Yaro Shkvorets",
+            "email": "yaro@pinax.network"
+        }
+    ],
     "files": [
         "index.ts",
         "version.ts",
@@ -19,16 +23,19 @@
     ],
     "scripts": {
         "start": "tsc && node ./dist/bin/cli.mjs",
-        "start-uniswap-types": "tsc && node ./dist/bin/cli.mjs -e eth.substreams.pinax.network:443 --manifest https://github.com/streamingfast/substreams-uniswap-v3/releases/download/v0.2.8/substreams.spkg --module-name map_extract_data_types -s 12369821 -t +100",
-        "start-uniswap-pools": "tsc && node ./dist/bin/cli.mjs -e eth.substreams.pinax.network:443 --manifest https://github.com/streamingfast/substreams-uniswap-v3/releases/download/v0.2.8/substreams.spkg --module-name map_pools_created -s 12369821 -t +100",
+        "start-uniswap-types": "tsc && node ./dist/bin/cli.mjs -e eth.substreams.pinax.network:443 --manifest https://github.com/streamingfast/substreams-uniswap-v3/releases/download/v0.2.8/substreams.spkg --module-name map_extract_data_types -s 12369821 -t +1000",
+        "start-uniswap-pools": "tsc && node ./dist/bin/cli.mjs -e eth.substreams.pinax.network:443 --manifest https://github.com/streamingfast/substreams-uniswap-v3/releases/download/v0.2.8/substreams.spkg --module-name map_pools_created -s 12369821 -t +1000",
         "start-tokens-accounts": "tsc && node ./dist/bin/cli.mjs -e eos.substreams.pinax.network:443 --manifest https://github.com/pinax-network/substreams-antelope-tokens/releases/download/v0.3.8/antelope-tokens-v0.3.8.spkg --module-name map_accounts -s 1000000 -t +1000",
         "start-tokens-entities": "tsc && node ./dist/bin/cli.mjs -e eos.substreams.pinax.network:443 --manifest https://github.com/pinax-network/substreams-antelope-tokens/releases/download/v0.3.8/antelope-tokens-v0.3.8.spkg --schema schema.example.tokens.sql --module-name graph_out -s 1000000 -t +1000",
         "start-brc20-events": "tsc && node ./dist/bin/cli.mjs -e bitcoin.substreams.pinax.network:443 --manifest https://github.com/0xPlaygrounds/brc20-substreams/releases/download/v0.1.2/brc20-substreams-v0.1.2.spkg --module-name map_brc20_events -s 800000 -t +1000",
+        "start-meta-dbout": "tsc && node ./dist/bin/cli.mjs -e eth.substreams.pinax.network:443 --manifest https://github.com/streamingfast/substreams-eth-block-meta/releases/download/v0.5.1/substreams-eth-block-meta-v0.5.1.spkg --schema schema.example.block_meta.sql --module-name db_out -s 2 -t +1000",
+        "start-uniswap-dbout": "tsc && node ./dist/bin/cli.mjs -e eth.substreams.pinax.network:443 --manifest https://github.com/streamingfast/substreams-uniswap-v3-liquidity/releases/download/v0.0.4/substreams-uniswap-v3-liquidity-v0.0.4.spkg --schema schema.example.uni_liq.sql --module-name db_out -s 12369621 -t +1000",
         "test": "bun test",
         "posttest": "tsc --noEmit",
         "prepublishOnly": "tsc"
     },
     "dependencies": {
+        "@substreams/sink-database-changes": "^0.3.6",
         "@substreams/sink-entity-changes": "^0.3.11",
         "log-update": "latest",
         "substreams-sink": "^0.16.0"

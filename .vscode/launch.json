@@ -121,6 +121,64 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Debug meta_db",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "env": {
+            },
+            "program": "${workspaceFolder}/dist/bin/cli.mjs",
+            "args": [
+                "-e",
+                "eth.substreams.pinax.network:443",
+                "--manifest",
+                "https://github.com/streamingfast/substreams-eth-block-meta/releases/download/v0.5.1/substreams-eth-block-meta-v0.5.1.spkg",
+                "--module-name",
+                "db_out",
+                "--schema",
+                "./schema.example.block_meta.sql",
+                "-s",
+                "2",
+                "-t",
+                "1000"
+            ],
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": [
+                "${workspaceFolder}/dist/**/*.js"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug uniswap_db",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "env": {
+            },
+            "program": "${workspaceFolder}/dist/bin/cli.mjs",
+            "args": [
+                "-e",
+                "eth.substreams.pinax.network:443",
+                "--manifest",
+                "https://github.com/streamingfast/substreams-uniswap-v3-liquidity/releases/download/v0.0.4/substreams-uniswap-v3-liquidity-v0.0.4.spkg",
+                "--module-name",
+                "db_out",
+                "--schema",
+                "./schema.example.uni_liq.sql",
+                "-s",
+                "12369621",
+                "-t",
+                "+1000"
+            ],
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": [
+                "${workspaceFolder}/dist/**/*.js"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Debug brc20_events",
             "skipFiles": [
                 "<node_internals>/**"
