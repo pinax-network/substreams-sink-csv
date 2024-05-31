@@ -126,6 +126,7 @@ Additionally, `*.clock`, `*.session` & `*.cursor` files are generated to keep tr
 eth.substreams.pinax.network-3b180e1d2390afef1f22651581304e04245ba001-graph_out-block_meta.csv
 eth.substreams.pinax.network-3b180e1d2390afef1f22651581304e04245ba001-graph_out.clock
 eth.substreams.pinax.network-3b180e1d2390afef1f22651581304e04245ba001-graph_out.cursor
+eth.substreams.pinax.network-3b180e1d2390afef1f22651581304e04245ba001-graph_out.session
 ```
 
 ### CLI Help

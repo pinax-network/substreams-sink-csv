@@ -1,5 +1,5 @@
 {
-    "version": "0.3.1",
+    "version": "0.3.2",
     "name": "substreams-sink-csv",
     "description": "Substreams Sink CSV",
     "type": "module",

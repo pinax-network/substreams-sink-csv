@@ -30,8 +30,17 @@ export function applyReservedFields( values: Record<string, unknown>, meta: Meta
     if ( !values["timestamp"] ) values["timestamp"] = timestamp;
 
     // exception parsing timestamp
-    if ( values["timestamp"] ) values["timestamp"] = parseTimestamp(Timestamp.fromDate(new Date(values["timestamp"] as string)));
+    if ( values["timestamp"] ) {
+        // parse UTC string to timestamp
+        if ( !isNumber(values["timestamp"]) ) {
+            values["timestamp"] = parseTimestamp(Timestamp.fromDate(new Date(values["timestamp"] as string)));
+        }
+    }
     else values["timestamp"] = timestamp;
 
     return values;
+}
+
+function isNumber(value: unknown): value is number {
+    return !isNaN(Number(value));
 }
