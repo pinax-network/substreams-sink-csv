@@ -96,10 +96,10 @@ export async function action(options: CSVRunOptions ) {
   // Stream Messages
   emitter.on("anyMessage", async (data, cursor, clock) => {
     const { block_number, timestamp, seconds } = parseClock(clock);
+    blocks += last_block_number ? block_number - last_block_number : 1;
     last_block_number = block_number;
     last_timestamp = timestamp;
     last_seconds = seconds;
-
 
     if (dataType == OutputType.EntityChanges) {
       for ( const entityChange of EntityChanges.parse(data).entityChanges ) {
@@ -150,17 +150,15 @@ export async function action(options: CSVRunOptions ) {
     }
 
     // logging
-    blocks++;
     log();
   });
 
   function log() {
     const now = Math.floor(Date.now() / 1000);
-    if ( last_update != now) {
-      last_update = now;
-      const blocksPerSecond = Math.floor(blocks / (last_update - start));
-      logUpdate(JSON.stringify({last_block_number, last_timestamp, blocks, rows, blocksPerSecond, totalBytesRead, totalBytesWritten, runningJobs}));
-    }
+    if ( last_update == now ) return;
+    last_update = now;
+    const blocksPerSecond = Math.floor(blocks / (last_update - start));
+    logUpdate(JSON.stringify({last_block_number, last_timestamp, blocks, rows, blocksPerSecond, totalBytesRead, totalBytesWritten, runningJobs}));
   }
 
   fileCursor.onCursor(emitter, cursorFile);
