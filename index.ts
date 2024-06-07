@@ -31,7 +31,7 @@ export async function action(options: CSVRunOptions ) {
   const { tables, moduleHash, dataType } = await loadSchema(options);
 
   // Cursor
-  console.log(JSON.stringify({manifest: options.manifest, moduleName: options.moduleName, moduleHash}));
+  console.log(JSON.stringify({moduleHash, ...options}));
   const { name, dirname, cursorFile, clockFile, sessionFile } = parseFilename(moduleHash, options);
   const startCursor = fs.existsSync(cursorFile) ? fs.readFileSync(cursorFile, "utf8") : '';
   console.log(JSON.stringify({name, dirname, cursorFile, clockFile, sessionFile}));
